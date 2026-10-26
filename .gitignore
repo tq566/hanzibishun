@@ -1,0 +1,8 @@
+# 临时文件与本地缓存
+.screenshots/
+.trae-html-share-packages/
+.trae/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一笔一画 · 汉字笔顺教学软件</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">笔</span>
+    <div class="brand-text">
+      <b>一笔一画</b>
+      <small>汉字笔顺规范教学软件</small>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="learn" class="active">学习</button>
+    <button data-tab="practice">临摹练习</button>
+    <button data-tab="library">汉字库</button>
+    <button data-tab="favs">收藏</button>
+    <button data-tab="history">历史</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 学习页 ============ -->
+  <section id="tab-learn" class="tab-panel active">
+    <div class="input-card">
+      <div class="input-row">
+        <input id="char-input" type="text" maxlength="64" autocomplete="off"
+               placeholder="输入汉字（支持批量，如：你好中国），回车或点击添加">
+        <button id="btn-add" class="btn primary">添加</button>
+        <button id="btn-sample" class="btn ghost">示例</button>
+      </div>
+      <div class="input-hint">仅支持有效中文汉字，非汉字字符将被自动过滤；单次最多 64 字，队列最多 100 字</div>
+    </div>
+
+    <div class="queue-card" id="queue-card">
+      <div class="queue-head">学习队列 <span id="queue-count"></span>
+        <button id="btn-clear-queue" class="btn tiny ghost">清空</button>
+      </div>
+      <div id="queue" class="queue"></div>
+    </div>
+
+    <div class="learn-layout">
+      <div class="stage-card">
+        <div class="stage-head">
+          <div class="stage-char" id="stage-char">永</div>
+          <div class="stage-meta">
+            <div class="pinyin" id="stage-pinyin">yǒng</div>
+            <div class="meta-line"><span id="stroke-count">5</span> 画 · <span id="char-level">一级字</span></div>
+          </div>
+        </div>
+        <div class="stage-wrap">
+          <div id="stage" class="stage"></div>
+          <div id="stage-loading" class="stage-loading hidden"><div class="spinner"></div>加载笔画数据…</div>
+          <div id="stage-error" class="stage-error hidden">未找到该字的笔画数据</div>
+        </div>
+        <div class="stage-status">
+          <span id="stroke-status" class="stroke-status">准备就绪</span>
+          <span id="stroke-progress" class="stroke-progress"></span>
+        </div>
+        <div class="controls">
+          <div class="ctrl-group">
+            <button id="btn-play" class="btn primary" title="播放/暂停（空格）">▶ 播放</button>
+            <button id="btn-replay" class="btn" title="重播（R）">⟳ 重播</button>
+          </div>
+          <div class="ctrl-group">
+            <button id="btn-prev" class="btn" title="上一笔（←）">|◀ 上一笔</button>
+            <button id="btn-next" class="btn" title="下一笔（→）">下一笔 ▶|</button>
+          </div>
+          <div class="ctrl-group speed" id="speed-group">
+            <span class="ctrl-label">速度</span>
+            <button data-speed="0.5" class="btn tiny">0.5x</button>
+            <button data-speed="1" class="btn tiny active">1x</button>
+            <button data-speed="1.5" class="btn tiny">1.5x</button>
+            <button data-speed="2" class="btn tiny">2x</button>
+          </div>
+          <div class="ctrl-group toggles">
+            <label class="toggle"><input type="checkbox" id="tg-outline" checked><span>轮廓</span></label>
+            <label class="toggle"><input type="checkbox" id="tg-grid" checked><span>米字格</span></label>
+            <label class="toggle"><input type="checkbox" id="tg-nums" checked><span>笔画编号</span></label>
+            <label class="toggle"><input type="checkbox" id="tg-autonext"><span>连续播放</span></label>
+          </div>
+        </div>
+      </div>
+
+      <aside class="info-panel">
+        <div class="meta-card">
+          <div class="meta-row"><span class="k">拼音</span><span class="v" id="info-pinyin">—</span></div>
+          <div class="meta-row"><span class="k">部首</span><span class="v" id="info-radical">—</span></div>
+          <div class="meta-row"><span class="k">结构</span><span class="v" id="info-struct">—</span></div>
+          <div class="meta-row"><span class="k">结构说明</span><span class="v" id="info-struct-note">—</span></div>
+        </div>
+        <div class="panel-block">
+          <h3>笔顺列表</h3>
+          <div id="stroke-list" class="stroke-list"></div>
+        </div>
+        <div class="panel-block" id="tips-block">
+          <h3>易错提示</h3>
+          <div id="tips" class="tips"></div>
+        </div>
+        <div class="action-row">
+          <button id="btn-practice" class="btn primary">✍ 开始临摹</button>
+          <button id="btn-fav" class="btn">☆ 收藏</button>
+        </div>
+        <div class="action-row">
+          <button id="btn-export-svg" class="btn">⬇ 导出动画 SVG</button>
+          <button id="btn-export-webm" class="btn">⬇ 导出视频</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 临摹练习页 ============ -->
+  <section id="tab-practice" class="tab-panel">
+    <div class="practice-layout">
+      <div class="practice-card">
+        <div class="practice-head">
+          <span>临摹练习</span>
+          <span class="practice-target" id="p-char-info">—</span>
+        </div>
+        <div class="quiz-wrap">
+          <div id="quiz-area"></div>
+          <div class="quiz-mask" id="quiz-mask">
+            <p>请先在「学习」页选择一个汉字</p>
+            <button class="btn primary" id="btn-goto-learn">返回学习页</button>
+          </div>
+        </div>
+        <div class="practice-status" id="p-status">在米字格内按笔顺描写每一笔</div>
+      </div>
+      <aside class="practice-side">
+        <div class="panel-block">
+          <h3>练习进度</h3>
+          <div id="p-progress" class="p-progress">—</div>
+          <div class="p-stats">
+            <div class="p-stat"><span id="p-mistakes">0</span><label>失误次数</label></div>
+            <div class="p-stat"><span id="p-score">—</span><label>得分</label></div>
+          </div>
+        </div>
+        <div class="panel-block">
+          <h3>练习设置</h3>
+          <div class="form-row">
+            <label>判定严格度</label>
+            <select id="p-strict">
+              <option value="1.5">宽松（适合初学）</option>
+              <option value="1" selected>标准</option>
+              <option value="0.65">严格（挑战模式）</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>描红底字</label>
+            <select id="p-outline">
+              <option value="1" selected>显示（描红模式）</option>
+              <option value="0">隐藏（默写模式）</option>
+            </select>
+          </div>
+          <div class="action-row">
+            <button id="btn-p-restart" class="btn primary">重新开始</button>
+            <button id="btn-p-back" class="btn ghost">返回学习</button>
+          </div>
+        </div>
+        <div class="panel-block">
+          <h3>练习提示</h3>
+          <ul class="tip-list">
+            <li>按笔顺一笔一笔书写，写错会有即时提醒</li>
+            <li>笔画方向和位置都正确才算通过</li>
+            <li>连续写错 2 次会自动闪烁提示正确笔画</li>
+            <li>完成后系统根据失误次数自动评分</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 汉字库页 ============ -->
+  <section id="tab-library" class="tab-panel">
+    <div class="lib-bar">
+      <input id="lib-search" type="text" placeholder="按拼音检索（如 ni / hao / xing），或直接输入汉字">
+      <select id="lib-level">
+        <option value="all">全部 6763 字</option>
+        <option value="l1">一级字表 3755 字</option>
+        <option value="l2">二级字表 3008 字</option>
+      </select>
+      <select id="lib-mode">
+        <option value="pinyin">按拼音浏览</option>
+        <option value="radical">按部首浏览</option>
+      </select>
+      <span id="lib-building" class="lib-building hidden">正在建立索引…</span>
+    </div>
+    <div id="lib-index" class="lib-index"></div>
+    <div id="lib-grid" class="char-grid"></div>
+    <div class="lib-more">
+      <button id="btn-lib-more" class="btn ghost hidden">加载更多</button>
+      <div id="lib-count" class="lib-count"></div>
+    </div>
+  </section>
+
+  <!-- ============ 收藏页 ============ -->
+  <section id="tab-favs" class="tab-panel">
+    <div class="grid-toolbar">
+      <span id="favs-count"></span>
+      <button id="btn-clear-favs" class="btn tiny ghost">清空收藏</button>
+    </div>
+    <div id="favs-grid" class="char-grid"></div>
+    <div id="favs-empty" class="empty-tip">还没有收藏，在学习页点击「☆ 收藏」即可添加</div>
+  </section>
+
+  <!-- ============ 历史页 ============ -->
+  <section id="tab-history" class="tab-panel">
+    <div class="grid-toolbar">
+      <span id="hist-count"></span>
+      <button id="btn-clear-hist" class="btn tiny ghost">清空历史</button>
+    </div>
+    <div id="hist-grid" class="char-grid"></div>
+    <div id="hist-empty" class="empty-tip">暂无学习记录</div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>笔顺依据国家语言文字工作委员会《现代汉语通用字笔顺规范》《GB13000.1 字符集汉字笔顺规范》 · 覆盖 GB2312 一级字 3755 个、二级字 3008 个 · 本软件无任何广告</p>
+</footer>
+
+<div id="toasts" class="toasts"></div>
+
+<div id="modal-mask" class="modal-mask hidden">
+  <div class="modal">
+    <h2 id="modal-title">练习完成</h2>
+    <div id="modal-score" class="modal-score"></div>
+    <div id="modal-stars" class="modal-stars"></div>
+    <div id="modal-detail" class="modal-detail"></div>
+    <div class="action-row center">
+      <button id="btn-modal-again" class="btn primary">再练一次</button>
+      <button id="btn-modal-next" class="btn">下一个字</button>
+      <button id="btn-modal-close" class="btn ghost">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="export-mask" class="modal-mask hidden">
+  <div class="modal small">
+    <h2>正在生成…</h2>
+    <p id="export-status">渲染中，请稍候</p>
+  </div>
+</div>
+
+<script src="vendor/cnchar.min.js"></script>
+<script src="vendor/cnchar-poly.min.js"></script>
+<script src="vendor/cnchar-order.min.js"></script>
+<script src="vendor/cnchar-radical.min.js"></script>
+<script src="vendor/hanzi-writer.min.js"></script>
+<script src="js/charset-data.js"></script>
+<script src="js/data-service.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/practice.js"></script>
+<script src="js/library.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
