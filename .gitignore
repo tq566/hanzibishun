@@ -3,6 +3,13 @@
 .trae-html-share-packages/
 .trae/
 node_modules/
+.edgeone/
 *.log
 .DS_Store
 Thumbs.db
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+  
